@@ -3,9 +3,20 @@
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="style.css" />
     <title>Homepage</title>
   </head>
   <body>
+    <header>
+      <nav>
+        <a href="index.html">Homepage</a>
+      </nav>
+      <nav>
+        <a href="signup.html">Signup</a>
+        <a href="login.html">Login</a>
+        <a href="logout.html">Logout</a>
+      </nav>
+    </header>
     <div id="welcomeMessage"></div>
     <script src="script.js"></script>
     <script>
@@ -15,6 +26,15 @@
         if (user != null) {
           document.querySelector("#welcomeMessage").innerHTML =
             "Welcome, " + user.email;
+
+          document
+            .querySelector("[href='signup.html']")
+            .classList.add("hidden");
+          document.querySelector("[href='login.html']").classList.add("hidden");
+        } else {
+          document
+            .querySelector("[href='logout.html']")
+            .classList.add("hidden");
         }
       })();
     </script>

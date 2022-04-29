@@ -4,6 +4,16 @@
     <link rel="stylesheet" href="style.css" />
   </head>
   <body>
+    <header>
+      <nav>
+        <a href="index.html">Homepage</a>
+      </nav>
+      <nav>
+        <a href="signup.html">Signup</a>
+        <a href="login.html">Login</a>
+        <a href="logout.html">Logout</a>
+      </nav>
+    </header>
     <form>
       <div class="container">
         <h1>Sign Up</h1>
@@ -43,8 +53,18 @@
     <script>
       (async () => {
         const user = await getCurrentUser();
+
         if (user != null) {
           location.href = "index.html";
+
+          document
+            .querySelector("[href='signup.html']")
+            .classList.add("hidden");
+          document.querySelector("[href='login.html']").classList.add("hidden");
+        } else {
+          document
+            .querySelector("[href='logout.html']")
+            .classList.add("hidden");
         }
       })();
 
