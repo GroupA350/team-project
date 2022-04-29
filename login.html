@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <form>
+      <div class="container">
+        <h1>Login</h1>
+
+        <div class="error"></div>
+        <div class="message"></div>
+
+        <label
+          ><b>Email</b>
+          <input type="text" placeholder="Email" name="email" />
+        </label>
+
+        <label
+          ><b>Password</b>
+          <input type="text" placeholder="Enter Password" name="password" />
+        </label>
+
+        <button type="submit" class="loginbtn">Login</button>
+      </div>
+    </form>
+
+    <script src="script.js"></script>
+    <script>
+      (async () => {
+        const user = await getCurrentUser();
+        if (user != null) {
+          location.href = "index.html";
+        }
+      })();
+
+      const form = document.querySelector("form");
+      let isLoading = false;
+
+      form.onsubmit = async (e) => {
+        e.preventDefault();
+        if (isLoading) return;
+
+        isLoading = true;
+        document.querySelector(".error").innerHTML = "";
+        document.querySelector(".message").innerHTML = "";
+
+        const response = await fetch("api/login.php", {
+          // "GET", "POST", "PUT", "DELETE"
+          method: "POST",
+          body: JSON.stringify({
+            email: document.querySelector("[name='email']").value,
+            password: document.querySelector("[name='password']").value,
+          }),
+          credentials: "include",
+        });
+
+        // Was the status/response code erroneous?
+        if (!response.ok) {
+          const data = await response.json();
+          document.querySelector(".error").innerHTML = data.message;
+        } else {
+          const data = await response.json();
+          document.querySelector(".message").innerHTML = data.message;
+          location.href = "index.html";
+        }
+
+        isLoading = false;
+      };
+    </script>
+  </body>
+</html>
