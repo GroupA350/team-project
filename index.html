@@ -37,9 +37,18 @@
       </script>
     </header>
     <main>
+      <div class="error"></div>
+      <div class="message"></div>
       <div id="schedule"></div>
       <script>
-        (async () => {
+        renderSchedule();
+
+        async function renderSchedule() {
+          // Delete everything in the schedule div
+          document.querySelector("#schedule").innerHTML = "";
+
+          document.querySelector("#schedule").append(new Date());
+
           const start = new Date();
           start.setHours(0, 0, 0, 0);
 
@@ -95,7 +104,29 @@
             const button = newElement(
               `<button>${startHour}${startSuffix} - ${endHour}${endSuffix}</button>`
             );
-            button.onclick = () => {};
+            button.onclick = async () => {
+              document.querySelector(".error").innerHTML = "";
+              document.querySelector(".message").innerHTML = "";
+
+              const response = await fetch(`api/reserve-time.php`, {
+                method: "POST",
+                body: JSON.stringify({
+                  start: dateToMysqlFormat(start),
+                  end: dateToMysqlFormat(end),
+                }),
+                credentials: "include",
+              });
+
+              if (!response.ok) {
+                const data = await response.json();
+                document.querySelector(".error").innerHTML = data.message;
+              } else {
+                renderSchedule();
+
+                const data = await response.json();
+                document.querySelector(".message").innerHTML = data.message;
+              }
+            };
 
             if (isRangeReserved(start, end, reservations)) {
               button.disabled = true;
@@ -103,7 +134,7 @@
 
             document.querySelector("#schedule").append(button);
           }
-        })();
+        }
 
         function isRangeReserved(start, end, reservations) {
           // TODO:
