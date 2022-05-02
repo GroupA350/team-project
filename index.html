@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="stylesheet" href="style.css" />
     <title>Homepage</title>
+    <script src="script.js"></script>
   </head>
   <body>
     <header>
@@ -16,27 +17,134 @@
         <a href="login.html">Login</a>
         <a href="logout.html">Logout</a>
       </nav>
+      <script>
+        (async () => {
+          const user = await getCurrentUser();
+
+          if (user != null) {
+            document
+              .querySelector("[href='signup.html']")
+              .classList.add("hidden");
+            document
+              .querySelector("[href='login.html']")
+              .classList.add("hidden");
+          } else {
+            document
+              .querySelector("[href='logout.html']")
+              .classList.add("hidden");
+          }
+        })();
+      </script>
     </header>
-    <div id="welcomeMessage"></div>
-    <script src="script.js"></script>
-    <script>
-      (async () => {
-        const user = await getCurrentUser();
+    <main>
+      <div id="schedule"></div>
+      <script>
+        (async () => {
+          const start = new Date();
+          start.setHours(0, 0, 0, 0);
 
-        if (user != null) {
-          document.querySelector("#welcomeMessage").innerHTML =
-            "Welcome, " + user.email;
+          const end = new Date();
+          end.setHours(23, 59, 59, 0);
 
-          document
-            .querySelector("[href='signup.html']")
-            .classList.add("hidden");
-          document.querySelector("[href='login.html']").classList.add("hidden");
-        } else {
-          document
-            .querySelector("[href='logout.html']")
-            .classList.add("hidden");
+          const params = new URLSearchParams();
+          params.set("rangeStart", dateToMysqlFormat(start));
+          params.set("rangeEnd", dateToMysqlFormat(end));
+
+          const response = await fetch(
+            `api/get-reservations.php?${params.toString()}`,
+            {
+              method: "GET",
+              credentials: "include",
+            }
+          );
+
+          const reservations = await response.json();
+          console.log(reservations);
+
+          for (let i = 0; i < 8; i++) {
+            const start = new Date();
+            start.setHours(i * 3, 0, 0, 0);
+
+            const end = new Date();
+            end.setHours(i * 3 + 3, 0, 0, 0);
+
+            // NOTE: This works for 1-11
+            let startHour = start.getHours() % 12;
+            let endHour = end.getHours() % 12;
+            let startSuffix = "AM";
+            let endSuffix = "AM";
+
+            if (start.getHours() >= 12) {
+              startSuffix = "PM";
+            }
+
+            if (end.getHours() >= 12) {
+              endSuffix = "PM";
+            }
+
+            // Fix it for 0 or 12
+            if (startHour == 0) {
+              startHour = 12;
+            }
+
+            // Fix it for 0 or 12
+            if (endHour == 0) {
+              endHour = 12;
+            }
+
+            const button = newElement(
+              `<button>${startHour}${startSuffix} - ${endHour}${endSuffix}</button>`
+            );
+            button.onclick = () => {};
+
+            if (isRangeReserved(start, end, reservations)) {
+              button.disabled = true;
+            }
+
+            document.querySelector("#schedule").append(button);
+          }
+        })();
+
+        function isRangeReserved(start, end, reservations) {
+          // TODO:
+          // For each reservation...
+          // If 'start' is between the reservation's range, return true
+          // If 'end' is between the reservation's range, return true
+          // If 'start' is before the reservation AND 'end' is after, return true
+
+          // range                 v              v
+          // reservation              3AM    6AM
+
+          for (const reservation of reservations) {
+            // If 'start' is in the range
+            if (
+              start.getTime() >= new Date(reservation.start).getTime() &&
+              start.getTime() < new Date(reservation.end).getTime()
+            ) {
+              return true;
+            }
+
+            // If 'end' is in the range
+            if (
+              end.getTime() > new Date(reservation.start).getTime() &&
+              end.getTime() <= new Date(reservation.end).getTime()
+            ) {
+              return true;
+            }
+
+            // If the range contains the reservation
+            if (
+              start.getTime() <= new Date(reservation.start).getTime() &&
+              end.getTime() >= new Date(reservation.end).getTime()
+            ) {
+              return true;
+            }
+          }
+
+          return false;
         }
-      })();
-    </script>
+      </script>
+    </main>
+    <footer></footer>
   </body>
 </html>

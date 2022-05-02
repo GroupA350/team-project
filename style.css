@@ -75,6 +75,12 @@ button:hover {
   opacity: 1;
 }
 
+button[disabled] {
+  background-color: gray;
+  opacity: 0.9;
+  cursor: initial;
+}
+
 /* Add padding to container elements */
 .container {
   padding: 16px;
