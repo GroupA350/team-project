@@ -1,0 +1,6 @@
+- Add the schedule calendar to the homepage.
+  - Show the current day by default and allow the user to navigate to next/previous days.
+  - Create a database table for schedule.
+  - Create an api for...
+    - Get all currently booked time slots
+    - Booking a time slot
