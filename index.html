@@ -17,8 +17,17 @@
         <a href="login.html">Login</a>
         <a href="logout.html">Logout</a>
       </nav>
+    </header>
+    <main>
+      <div class="error"></div>
+      <div class="message"></div>
+      <div id="schedule"></div>
       <script>
-        (async () => {
+        let date = new Date();
+
+        renderSchedule(date);
+
+        async function renderSchedule(date) {
           const user = await getCurrentUser();
 
           if (user != null) {
@@ -33,26 +42,31 @@
               .querySelector("[href='logout.html']")
               .classList.add("hidden");
           }
-        })();
-      </script>
-    </header>
-    <main>
-      <div class="error"></div>
-      <div class="message"></div>
-      <div id="schedule"></div>
-      <script>
-        renderSchedule();
 
-        async function renderSchedule() {
           // Delete everything in the schedule div
           document.querySelector("#schedule").innerHTML = "";
+          document.querySelector(".error").innerHTML = "";
+          document.querySelector(".message").innerHTML = "";
 
-          document.querySelector("#schedule").append(new Date());
+          const previous = newElement(
+            `<button class="navButton">previous</button>`
+          );
+          previous.onclick = () => {
+            date.setDate(date.getDate() - 1);
+            renderSchedule(date);
+          };
+          const next = newElement(`<button class="navButton">next</button>`);
+          next.onclick = () => {
+            date.setDate(date.getDate() + 1);
+            renderSchedule(date);
+          };
 
-          const start = new Date();
+          document.querySelector("#schedule").append(previous, date, next);
+
+          const start = new Date(date);
           start.setHours(0, 0, 0, 0);
 
-          const end = new Date();
+          const end = new Date(date);
           end.setHours(23, 59, 59, 0);
 
           const params = new URLSearchParams();
@@ -71,10 +85,10 @@
           console.log(reservations);
 
           for (let i = 0; i < 8; i++) {
-            const start = new Date();
+            const start = new Date(date);
             start.setHours(i * 3, 0, 0, 0);
 
-            const end = new Date();
+            const end = new Date(date);
             end.setHours(i * 3 + 3, 0, 0, 0);
 
             // NOTE: This works for 1-11
@@ -120,23 +134,37 @@
               if (!response.ok) {
                 const data = await response.json();
                 document.querySelector(".error").innerHTML = data.message;
+
+                console.log(data.reservation);
+
+                if (data.reservation) {
+                  document.querySelector(
+                    ".error"
+                  ).innerHTML += `</br>Current reservation: ${data.reservation.start}`;
+                }
               } else {
-                renderSchedule();
+                renderSchedule(date);
 
                 const data = await response.json();
                 document.querySelector(".message").innerHTML = data.message;
               }
             };
 
-            if (isRangeReserved(start, end, reservations)) {
+            const reservation = getReservationInRange(start, end, reservations);
+            if (reservation != null) {
               button.disabled = true;
+              console.log("reservation.user_id: ", reservation.user_id);
+              console.log("user.id: ", user.id);
+              if (reservation.user_id == user.id) {
+                button.classList.add("reservedByCurrentUser");
+              }
             }
 
             document.querySelector("#schedule").append(button);
           }
         }
 
-        function isRangeReserved(start, end, reservations) {
+        function getReservationInRange(start, end, reservations) {
           // TODO:
           // For each reservation...
           // If 'start' is between the reservation's range, return true
@@ -152,7 +180,7 @@
               start.getTime() >= new Date(reservation.start).getTime() &&
               start.getTime() < new Date(reservation.end).getTime()
             ) {
-              return true;
+              return reservation;
             }
 
             // If 'end' is in the range
@@ -160,7 +188,7 @@
               end.getTime() > new Date(reservation.start).getTime() &&
               end.getTime() <= new Date(reservation.end).getTime()
             ) {
-              return true;
+              return reservation;
             }
 
             // If the range contains the reservation
@@ -168,11 +196,11 @@
               start.getTime() <= new Date(reservation.start).getTime() &&
               end.getTime() >= new Date(reservation.end).getTime()
             ) {
-              return true;
+              return reservation;
             }
           }
 
-          return false;
+          return null;
         }
       </script>
     </main>

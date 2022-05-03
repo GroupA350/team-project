@@ -61,6 +61,7 @@ hr {
 
 /* Set a style for all buttons */
 button {
+  position: relative;
   background-color: #04aa6d;
   color: white;
   padding: 14px 20px;
@@ -89,4 +90,27 @@ button[disabled] {
 .error {
   color: red;
   margin-bottom: 10px;
+}
+
+#schedule {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.navButton {
+  font-size: 0.8em;
+  background-color: grey;
+  width: auto;
+  padding: 0.5em;
+}
+
+.reservedByCurrentUser::before {
+  content: "✔️";
+  position: absolute;
+  left: 0;
+  top: 0;
+  font-size: 1.8em;
+  padding: 0.3em;
 }

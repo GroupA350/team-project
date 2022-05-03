@@ -4,6 +4,7 @@ $mysqli = new mysqli('localhost', 'root', '', 'laundry_machine_schedule');
 
 $statement = $mysqli->prepare("
     SELECT 
+        id,
         email,
         apartment_number
     FROM
