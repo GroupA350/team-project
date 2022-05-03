@@ -17,8 +17,7 @@ if (empty($_SESSION["currentUserEmail"])) {
     exit();
 }
 
-
-// Has the user already reserved a time this week?
+// Has the user already reserved a time this week or in the future?
 $statement = $mysqli->prepare("
     SELECT 
         *
@@ -26,11 +25,11 @@ $statement = $mysqli->prepare("
         reservations
     WHERE
         user_id = (SELECT id FROM users WHERE email = ?)
-    AND (YEARWEEK(start) = YEARWEEK(?) OR YEARWEEK(end) = YEARWEEK(?))
+    AND start >= DATE_ADD(CURDATE(), INTERVAL(1-DAYOFWEEK(CURDATE())) DAY)
 ");
 
 
-if (!$statement->execute([$_SESSION["currentUserEmail"], $data->start, $data->end])) {
+if (!$statement->execute([$_SESSION["currentUserEmail"]])) {
     http_response_code(500);
     echo json_encode([
         "message" => "Something went wrong."
@@ -41,10 +40,10 @@ if (!$statement->execute([$_SESSION["currentUserEmail"], $data->start, $data->en
 $rows = $statement->get_result()->fetch_all(MYSQLI_ASSOC);
 
 if (count($rows) > 0) {
-    http_response_code(400);
+    http_response_code(402);
     echo json_encode([
-        "message" => "You already have a reservation this week.",
-        "reservation" => json_encode($rows[0])
+        "message" => "You already have a reservation on the schedule.",
+        "reservation" => $rows[0]
     ]);
     exit();
 }
