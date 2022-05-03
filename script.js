@@ -8,7 +8,7 @@ async function getCurrentUser() {
   return await response.json();
 }
 
-// Creates an element from a given HTML string
+// Creates/returns an element (DOM object) from a given HTML string
 function newElement(html) {
   const template = document.createElement("template");
   template.innerHTML = html.trim();

@@ -2,6 +2,7 @@
 session_start();
 $mysqli = new mysqli('localhost', 'root', '', 'laundry_machine_schedule');
 
+// Reading the "body" (data) of the request.
 // start
 // end
 // $_SESSION["currentUserEmail"]
@@ -37,6 +38,7 @@ if (!$statement->execute([$_SESSION["currentUserEmail"]])) {
     exit();
 }
 
+// Stores the query results as an array of associative arrays.
 $rows = $statement->get_result()->fetch_all(MYSQLI_ASSOC);
 
 if (count($rows) > 0) {
@@ -44,15 +46,6 @@ if (count($rows) > 0) {
     echo json_encode([
         "message" => "You already have a reservation on the schedule.",
         "reservation" => $rows[0]
-    ]);
-    exit();
-}
-
-
-if (empty($_SESSION["currentUserEmail"])) {
-    http_response_code(403);
-    echo json_encode([
-        "message" => "Login to reserve a time."
     ]);
     exit();
 }

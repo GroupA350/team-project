@@ -63,6 +63,7 @@ if (!password_verify($data->password, $user["password_hash"])) {
     exit();
 }
 
+// Log in
 $_SESSION["currentUserEmail"] = $data->email;
 
 http_response_code(200);

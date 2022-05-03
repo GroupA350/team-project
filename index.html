@@ -43,6 +43,7 @@
               .classList.add("hidden");
           }
 
+          // NOTE: Always clear old data at the top of your render function.
           // Delete everything in the schedule div
           document.querySelector("#schedule").innerHTML = "";
           document.querySelector(".error").innerHTML = "";
@@ -74,6 +75,7 @@
           params.set("rangeEnd", dateToMysqlFormat(end));
 
           const response = await fetch(
+            //                       ?rangeStart=2022-05-03 09:33:00&rangeEnd=2022-05-03 12:33:00
             `api/get-reservations.php?${params.toString()}`,
             {
               method: "GET",
@@ -82,7 +84,6 @@
           );
 
           const reservations = await response.json();
-          console.log(reservations);
 
           for (let i = 0; i < 8; i++) {
             const start = new Date(date);
@@ -123,19 +124,23 @@
               document.querySelector(".message").innerHTML = "";
 
               const response = await fetch(`api/reserve-time.php`, {
+                // CRUD:    Create, Read, Update, Delete
+                // methods: POST    GET   PUT     DELETE
                 method: "POST",
                 body: JSON.stringify({
                   start: dateToMysqlFormat(start),
                   end: dateToMysqlFormat(end),
                 }),
+                // Tells the fetch to send cookies with this request.
+                // Sometimes this is not the default, but we NEED to
+                // send the PHPSESSID cookie to remember the user's session.
                 credentials: "include",
               });
 
+              // response.ok is true for 2XX response codes. That tells you there was no error.
               if (!response.ok) {
                 const data = await response.json();
                 document.querySelector(".error").innerHTML = data.message;
-
-                console.log(data.reservation);
 
                 if (data.reservation) {
                   document.querySelector(
@@ -143,6 +148,7 @@
                   ).innerHTML += `</br>Current reservation: ${data.reservation.start}`;
                 }
               } else {
+                // NOTE: Always re-render after doing a C, U, or D
                 renderSchedule(date);
 
                 const data = await response.json();
@@ -151,10 +157,9 @@
             };
 
             const reservation = getReservationInRange(start, end, reservations);
+
             if (reservation != null) {
               button.disabled = true;
-              console.log("reservation.user_id: ", reservation.user_id);
-              console.log("user.id: ", user.id);
               if (reservation.user_id == user.id) {
                 button.classList.add("reservedByCurrentUser");
               }
