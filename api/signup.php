@@ -8,8 +8,8 @@ $data = json_decode(file_get_contents("php://input"));
 // Input validation:
 
 // Is the email invalid?
-if( !filter_var($data->email, FILTER_VALIDATE_EMAIL) ){
-    http_response_code( 400 );
+if (!filter_var($data->email, FILTER_VALIDATE_EMAIL)) {
+    http_response_code(400);
     echo json_encode([
         "message" => "Invalid email address."
     ]);
@@ -17,8 +17,8 @@ if( !filter_var($data->email, FILTER_VALIDATE_EMAIL) ){
 }
 
 // Is the password invalid?
-if( strlen( $data->password ) < 8 ){
-    http_response_code( 400 );
+if (strlen($data->password) < 8) {
+    http_response_code(400);
     echo json_encode([
         "message" => "Password must be 8+ characters."
     ]);
@@ -26,8 +26,8 @@ if( strlen( $data->password ) < 8 ){
 }
 
 // Do the passwords mismatch?
-if( $data->password != $data->passwordRepeat ){
-    http_response_code( 400 );
+if ($data->password != $data->passwordRepeat) {
+    http_response_code(400);
     echo json_encode([
         "message" => "Passwords must match."
     ]);
@@ -35,8 +35,8 @@ if( $data->password != $data->passwordRepeat ){
 }
 
 // Is the apartment number invalid?
-if( strlen( $data->apartmentNumber ) < 2 ){
-    http_response_code( 400 );
+if (strlen($data->apartmentNumber) < 2) {
+    http_response_code(400);
     echo json_encode([
         "message" => "Invalid apartment number."
     ]);
@@ -53,8 +53,8 @@ $statement = $mysqli->prepare("
         email = ?
 ");
 
-if( !$statement->execute([$data->email]) ){
-    http_response_code( 500 );
+if (!$statement->execute([$data->email])) {
+    http_response_code(500);
     echo json_encode([
         "message" => "Something went wrong."
     ]);
@@ -63,8 +63,8 @@ if( !$statement->execute([$data->email]) ){
 
 $rows = $statement->get_result()->fetch_all();
 
-if( count($rows) > 0 ){
-    http_response_code( 400 );
+if (count($rows) > 0) {
+    http_response_code(400);
     echo json_encode([
         "message" => "Email is already in use."
     ]);
@@ -82,8 +82,8 @@ $statement = $mysqli->prepare("
         apartment_number = ?
 ");
 
-if( !$statement->execute([$data->apartmentNumber]) ){
-    http_response_code( 500 );
+if (!$statement->execute([$data->apartmentNumber])) {
+    http_response_code(500);
     echo json_encode([
         "message" => "Something went wrong."
     ]);
@@ -92,8 +92,8 @@ if( !$statement->execute([$data->apartmentNumber]) ){
 
 $rows = $statement->get_result()->fetch_all();
 
-if( count($rows) > 0 ){
-    http_response_code( 400 );
+if (count($rows) > 0) {
+    http_response_code(400);
     echo json_encode([
         "message" => "Apartment Number is already registered."
     ]);
@@ -118,8 +118,8 @@ $statement = $mysqli->prepare("
     VALUES(?, ?, ?)
 ");
 
-if( !$statement->execute([$data->email, $passwordHash, $data->apartmentNumber]) ){
-    http_response_code( 500 );
+if (!$statement->execute([$data->email, $passwordHash, $data->apartmentNumber])) {
+    http_response_code(500);
     echo json_encode([
         "message" => "Something went wrong."
     ]);
@@ -130,7 +130,7 @@ if( !$statement->execute([$data->email, $passwordHash, $data->apartmentNumber]) 
 
 $_SESSION["currentUserEmail"] = $data->email;
 
-http_response_code( 200 );
+http_response_code(200);
 echo json_encode([
     "message" => "Signup successful!"
 ]);
